@@ -59,27 +59,37 @@ class Quizz:
         return score
 
 
-def create_quizz_object_from_json_file(json_file):
-    # TODO gestion d'erreur ouverture du fichier, désérialisation
-    json_file = open(json_file, "r")
+def create_quizz_object_from_json_file(json_file_name):
+    try:
+        json_file = open(json_file_name, "r")
+    except FileNotFoundError:
+        print("ERREUR: impossible d'ouvrir le fichier " + json_file_name)
+        return None
     json_text = json_file.read()
     json_file.close()
     quizz_from_json = json.loads(json_text)
-    quizz_category = quizz_from_json["categorie"]
-    quizz_title = quizz_from_json["titre"]
-    quizz_difficulty = quizz_from_json["difficulte"]
-    quizz_questions = []
-    for question in quizz_from_json["questions"]:
-        question_title = question["titre"]
-        question_proposals = []
-        question_good_answer = ""
-        for choix in question["choix"]:
-            question_proposals.append(choix[0])
-            if choix[1]:
-                question_good_answer = choix[0]
-        quizz_questions.append(Question(question_title, question_proposals, question_good_answer))
+    try:
+        quizz_category = quizz_from_json["categorie"]
+        quizz_title = quizz_from_json["titre"]
+        quizz_difficulty = quizz_from_json["difficulte"]
+        quizz_questions = []
+        for question in quizz_from_json["questions"]:
+            question_title = question["titre"]
+            question_proposals = []
+            question_good_answer = ""
+            for choix in question["choix"]:
+                question_proposals.append(choix[0])
+                if choix[1]:
+                    question_good_answer = choix[0]
+            quizz_questions.append(Question(question_title, question_proposals, question_good_answer))
+    except KeyError:
+        print("KeyError: impossible de créer un questionnaire à partir du fichier " + json_file_name)
+        return None
     return Quizz(quizz_category, quizz_title, quizz_difficulty, quizz_questions)
 
 
 quizz = create_quizz_object_from_json_file("animaux_animauxenvrac_confirme.json")
-quizz.lancer()
+if quizz:
+    quizz.lancer()
+else:
+    print("ERREUR: Le questionnaire n'a pas pu être chargé. Fin du programme.")
