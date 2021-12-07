@@ -14,7 +14,6 @@ class Question:
         return q
 
     def poser(self):
-        print("QUESTION")
         print("  " + self.titre)
         for i in range(len(self.choix)):
             print("  ", i + 1, "-", self.choix[i])
@@ -50,12 +49,20 @@ class Quizz:
         self.title = title
         self.difficulty = difficulty
         self.questions = questions
+        self.nb_questions = len(questions)
 
     def lancer(self):
+        print("\n### Début du questionnaire sur " + self.title + " ###")
+        print("  Catégorie : " + self.category)
+        print("  Difficulté : " + self.difficulty)
+        print("  " + str(self.nb_questions) + " questions\n")
         score = 0
+        question_counter = 1
         for question in self.questions:
+            print("QUESTION " + str(question_counter) + "/" + str(self.nb_questions))
             if question.poser():
                 score += 1
+            question_counter += 1
         print("Score final :", score, "sur", len(self.questions))
         return score
 
