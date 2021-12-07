@@ -1,23 +1,5 @@
-# PROJET QUESTIONNAIRE V3 : POO
-#
-# - Pratiquer sur la POO
-# - Travailler sur du code existant
-# - Mener un raisonnement
-#
-# -> Définir les entitées (données, actions)
-#
-# Question
-#    - titre       - str
-#    - choix       - (str)
-#    - bonne_reponse   - str
-#
-#    - poser()  -> bool
-#
-# Questionnaire
-#    - questions      - (Question)
-#
-#    - lancer()
-#
+import json
+
 
 class Question:
     def __init__(self, titre, choix, bonne_reponse):
@@ -34,17 +16,17 @@ class Question:
         print("QUESTION")
         print("  " + self.titre)
         for i in range(len(self.choix)):
-            print("  ", i+1, "-", self.choix[i])
+            print("  ", i + 1, "-", self.choix[i])
 
         print()
         resultat_response_correcte = False
         reponse_int = Question.demander_reponse_numerique_utlisateur(1, len(self.choix))
-        if self.choix[reponse_int-1].lower() == self.bonne_reponse.lower():
+        if self.choix[reponse_int - 1].lower() == self.bonne_reponse.lower():
             print("Bonne réponse")
             resultat_response_correcte = True
         else:
             print("Mauvaise réponse")
-            
+
         print()
         return resultat_response_correcte
 
@@ -59,9 +41,13 @@ class Question:
         except:
             print("ERREUR : Veuillez rentrer uniquement des chiffres")
         return Question.demander_reponse_numerique_utlisateur(min, max)
-    
-class Questionnaire:
-    def __init__(self, questions):
+
+
+class Quizz:
+    def __init__(self, category, title, difficulty, questions):
+        self.category = category
+        self.title = title
+        self.difficulty = difficulty
         self.questions = questions
 
     def lancer(self):
@@ -73,27 +59,27 @@ class Questionnaire:
         return score
 
 
-"""questionnaire = (
-    ("Quelle est la capitale de la France ?", ("Marseille", "Nice", "Paris", "Nantes", "Lille"), "Paris"), 
-    ("Quelle est la capitale de l'Italie ?", ("Rome", "Venise", "Pise", "Florence"), "Rome"),
-    ("Quelle est la capitale de la Belgique ?", ("Anvers", "Bruxelles", "Bruges", "Liège"), "Bruxelles")
-                )
-
-lancer_questionnaire(questionnaire)"""
-
-# q1 = Question("Quelle est la capitale de la France ?", ("Marseille", "Nice", "Paris", "Nantes", "Lille"), "Paris")
-# q1.poser()
-
-# data = (("Marseille", "Nice", "Paris", "Nantes", "Lille"), "Paris", "Quelle est la capitale de la France ?")
-# q = Question.FromData(data)
-# print(q.__dict__)
-
-Questionnaire(
-    (
-    Question("Quelle est la capitale de la France ?", ("Marseille", "Nice", "Paris", "Nantes", "Lille"), "Paris"), 
-    Question("Quelle est la capitale de l'Italie ?", ("Rome", "Venise", "Pise", "Florence"), "Rome"),
-    Question("Quelle est la capitale de la Belgique ?", ("Anvers", "Bruxelles", "Bruges", "Liège"), "Bruxelles")
-    )
-).lancer()
+def create_quizz_object_from_json_file(json_file):
+    # TODO gestion d'erreur ouverture du fichier, désérialisation
+    json_file = open(json_file, "r")
+    json_text = json_file.read()
+    json_file.close()
+    quizz_from_json = json.loads(json_text)
+    quizz_category = quizz_from_json["categorie"]
+    quizz_title = quizz_from_json["titre"]
+    quizz_difficulty = quizz_from_json["difficulte"]
+    quizz_questions = []
+    for question in quizz_from_json["questions"]:
+        question_title = question["titre"]
+        question_proposals = []
+        question_good_answer = ""
+        for choix in question["choix"]:
+            question_proposals.append(choix[0])
+            if choix[1]:
+                question_good_answer = choix[0]
+        quizz_questions.append(Question(question_title, question_proposals, question_good_answer))
+    return Quizz(quizz_category, quizz_title, quizz_difficulty, quizz_questions)
 
 
+quizz = create_quizz_object_from_json_file("animaux_animauxenvrac_confirme.json")
+quizz.lancer()
