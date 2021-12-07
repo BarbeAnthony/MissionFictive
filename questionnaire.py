@@ -60,6 +60,7 @@ class Quizz:
 
 
 def create_quizz_object_from_json_file(json_file_name):
+    # Lecture et désérialisation du JSON
     try:
         json_file = open(json_file_name, "r")
     except FileNotFoundError:
@@ -69,11 +70,13 @@ def create_quizz_object_from_json_file(json_file_name):
     json_file.close()
     quizz_from_json = json.loads(json_text)
     try:
+        # préparation des variables d'instances du Quizz à partir du dictionnaire quizz_from_json
         quizz_category = quizz_from_json["categorie"]
         quizz_title = quizz_from_json["titre"]
         quizz_difficulty = quizz_from_json["difficulte"]
         quizz_questions = []
         for question in quizz_from_json["questions"]:
+            # préparation des variables d'instances des questions à partir du dictionnaire quizz_from_json
             question_title = question["titre"]
             question_proposals = []
             question_good_answer = ""
@@ -81,10 +84,13 @@ def create_quizz_object_from_json_file(json_file_name):
                 question_proposals.append(choix[0])
                 if choix[1]:
                     question_good_answer = choix[0]
-            quizz_questions.append(Question(question_title, question_proposals, question_good_answer))
+            # Création des objets Question() et ajout à la variable d'instance questions du Quizz
+            new_question = Question(question_title, question_proposals, question_good_answer)
+            quizz_questions.append(new_question)
     except KeyError:
         print("KeyError: impossible de créer un questionnaire à partir du fichier " + json_file_name)
         return None
+    # Création de l'objet Quizz avec les variables d'instances préparées
     return Quizz(quizz_category, quizz_title, quizz_difficulty, quizz_questions)
 
 
