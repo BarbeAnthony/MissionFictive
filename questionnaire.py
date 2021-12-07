@@ -95,8 +95,13 @@ def create_quizz_object_from_json_file(json_file_name):
     return Quizz(quizz_category, quizz_title, quizz_difficulty, quizz_questions)
 
 
-quizz = create_quizz_object_from_json_file(sys.argv[1])
-if quizz:
-    quizz.lancer()
+try:
+    json_file = sys.argv[1]
+except IndexError:
+    print("ERREUR : Vous devez ajouter un fichier json à lire : python questionnaire.py mon_questionnaire.json")
 else:
-    print("ERREUR: Le questionnaire n'a pas pu être chargé. Fin du programme.")
+    quizz = create_quizz_object_from_json_file(json_file)
+    if quizz:
+        quizz.lancer()
+    else:
+        print("ERREUR: Le questionnaire n'a pas pu être chargé. Fin du programme.")
