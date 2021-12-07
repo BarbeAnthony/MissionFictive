@@ -8,10 +8,13 @@ class Question:
         self.choix = choix
         self.bonne_reponse = bonne_reponse
 
-    def FromData(data):
-        # ....
-        q = Question(data[2], data[0], data[1])
-        return q
+    def from_data(data_question):
+        # transforme des données au format titre, ((proposition1, False), (proposition2, True)...) en Question(titre, [proposition1, proposition2...], proposition2)
+        proposals = [choix[0] for choix in data_question["choix"]]
+        good_answer = [choix[0] for choix in data_question["choix"] if choix[1]]
+        if len(good_answer) != 1:
+            return None
+        return Question(data_question["titre"], proposals, good_answer[0])
 
     def poser(self):
         print("  " + self.titre)
@@ -51,6 +54,33 @@ class Quizz:
         self.questions = questions
         self.nb_questions = len(questions)
 
+    def from_json_file(json_file_name):
+        try:
+            json_file = open(json_file_name, "r")
+        except FileNotFoundError:
+            print("ERREUR: impossible d'ouvrir le fichier " + json_file_name)
+            return None
+        json_text = json_file.read()
+        json_file.close()
+        json_data = json.loads(json_text)
+        return Quizz.from_json_data(json_data)
+
+    def from_json_data(json_data):
+        try:
+            quizz_category = json_data["categorie"]
+            quizz_title = json_data["titre"]
+            quizz_difficulty = json_data["difficulte"]
+            quizz_questions = [Question.from_data(question) for question in json_data["questions"]]
+            # Eliminer les questions None qui n'ont pas pu être créées à cause du formal des données
+            quizz_questions = [q for q in quizz_questions if q]
+        except KeyError:
+            print("KeyError: impossible de créer un questionnaire car les données du .json ne sont pas au format attendu.")
+            return None
+        if len(quizz_questions) == 0:
+            print("Aucune des questions de ce fichier n'est compatible avec ce programme. Elles doivent obligatoirement avoir une seule bonne réponse.")
+            return None
+        return Quizz(quizz_category, quizz_title, quizz_difficulty, quizz_questions)
+
     def lancer(self):
         print("\n### Début du questionnaire sur " + self.title + " ###")
         print("  Catégorie : " + self.category)
@@ -67,48 +97,11 @@ class Quizz:
         return score
 
 
-def create_quizz_object_from_json_file(json_file_name):
-    # Lecture et désérialisation du JSON
-    try:
-        json_file = open(json_file_name, "r")
-    except FileNotFoundError:
-        print("ERREUR: impossible d'ouvrir le fichier " + json_file_name)
-        return None
-    json_text = json_file.read()
-    json_file.close()
-    quizz_from_json = json.loads(json_text)
-    try:
-        # préparation des variables d'instances du Quizz à partir du dictionnaire quizz_from_json
-        quizz_category = quizz_from_json["categorie"]
-        quizz_title = quizz_from_json["titre"]
-        quizz_difficulty = quizz_from_json["difficulte"]
-        quizz_questions = []
-        for question in quizz_from_json["questions"]:
-            # préparation des variables d'instances des questions à partir du dictionnaire quizz_from_json
-            question_title = question["titre"]
-            question_proposals = []
-            question_good_answer = ""
-            for choix in question["choix"]:
-                question_proposals.append(choix[0])
-                if choix[1]:
-                    question_good_answer = choix[0]
-            # Création des objets Question() et ajout à la variable d'instance questions du Quizz
-            new_question = Question(question_title, question_proposals, question_good_answer)
-            quizz_questions.append(new_question)
-    except KeyError:
-        print("KeyError: impossible de créer un questionnaire à partir du fichier " + json_file_name)
-        return None
-    # Création de l'objet Quizz avec les variables d'instances préparées
-    return Quizz(quizz_category, quizz_title, quizz_difficulty, quizz_questions)
-
-
 try:
     json_file = sys.argv[1]
 except IndexError:
-    print("ERREUR : Vous devez ajouter un fichier json à lire : python questionnaire.py mon_questionnaire.json")
+    print("ERREUR : Vous devez ajouter un fichier json en argument : python questionnaire.py mon_questionnaire.json")
 else:
-    quizz = create_quizz_object_from_json_file(json_file)
+    quizz = Quizz.from_json_file(json_file)
     if quizz:
         quizz.lancer()
-    else:
-        print("ERREUR: Le questionnaire n'a pas pu être chargé. Fin du programme.")
