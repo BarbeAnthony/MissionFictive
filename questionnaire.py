@@ -1,4 +1,5 @@
 import json
+import sys
 
 
 class Question:
@@ -94,7 +95,7 @@ def create_quizz_object_from_json_file(json_file_name):
     return Quizz(quizz_category, quizz_title, quizz_difficulty, quizz_questions)
 
 
-quizz = create_quizz_object_from_json_file("animaux_animauxenvrac_confirme.json")
+quizz = create_quizz_object_from_json_file(sys.argv[1])
 if quizz:
     quizz.lancer()
 else:
