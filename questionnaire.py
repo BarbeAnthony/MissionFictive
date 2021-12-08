@@ -66,15 +66,19 @@ class Quizz:
         return Quizz.from_json_data(json_data)
 
     def from_json_data(json_data):
+        if not json_data.get("categorie"):
+            json_data["categorie"] = "inconnue"
+        if not json_data.get("difficulte"):
+            json_data["difficulte"] = "inconnue"
+        quizz_category = json_data["categorie"]
+        quizz_difficulty = json_data["difficulte"]
         try:
-            quizz_category = json_data["categorie"]
             quizz_title = json_data["titre"]
-            quizz_difficulty = json_data["difficulte"]
             quizz_questions = [Question.from_data(question) for question in json_data["questions"]]
             # Eliminer les questions None qui n'ont pas pu être créées à cause du formal des données
             quizz_questions = [q for q in quizz_questions if q]
         except KeyError:
-            print("KeyError: impossible de créer un questionnaire car les données du .json ne sont pas au format attendu.")
+            print("KeyError: impossible de créer un questionnaire car les données du .json ne sont pas au format attendu. Le questionnaire doit avoir un titre et des questions. La catégorie et la difficulté sont optionnels.")
             return None
         if len(quizz_questions) == 0:
             print("Aucune des questions de ce fichier n'est compatible avec ce programme. Elles doivent obligatoirement avoir une seule bonne réponse.")
@@ -97,11 +101,12 @@ class Quizz:
         return score
 
 
-try:
-    json_file = sys.argv[1]
-except IndexError:
-    print("ERREUR : Vous devez ajouter un fichier json en argument : python questionnaire.py mon_questionnaire.json")
-else:
-    quizz = Quizz.from_json_file(json_file)
-    if quizz:
-        quizz.lancer()
+if __name__ == "__main__":
+    try:
+        json_file = sys.argv[1]
+    except IndexError:
+        print("ERREUR : Vous devez ajouter un fichier json en argument : python questionnaire.py mon_questionnaire.json")
+    else:
+        quizz = Quizz.from_json_file(json_file)
+        if quizz:
+            quizz.lancer()
