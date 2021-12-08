@@ -52,8 +52,7 @@ def generate_json_file(categorie, titre, url):
             print("ERREUR: désérialisation et utilisation du json : " + url + " ; titre : " + titre)
 
 
-
-
-for quizz_data in open_quizz_db_data:
-    generate_json_file(quizz_data[0], quizz_data[1], quizz_data[2])
+if __name__ == "__main__":
+    for quizz_data in open_quizz_db_data:
+        generate_json_file(quizz_data[0], quizz_data[1], quizz_data[2])
 

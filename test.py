@@ -2,6 +2,8 @@ import os
 import unittest
 from unittest.mock import patch
 import questionnaire
+import questionnaire_import
+import json
 
 
 class TestsQuestion(unittest.TestCase):
@@ -60,3 +62,29 @@ class TestQuestionnaire(unittest.TestCase):
         self.assertIsNone(quizz)
 
 
+class TestImportQuestionnaire(unittest.TestCase):
+    def test_import_format_json(self):
+        questionnaire_import.generate_json_file("Animaux", "Les chats", "https://www.kiwime.com/oqdb/files/1050288832/OpenQuizzDB_050/openquizzdb_50.json")
+        filenames = ("animaux_leschats_debutant.json", "animaux_leschats_confirme.json", "animaux_leschats_expert.json")
+
+        for filename in filenames:
+            self.assertTrue(os.path.isfile(filename))
+            file = open(filename, "r")
+            json_str = file.read()
+            file.close()
+            try:
+                data = json.loads(json_str)
+            except:
+                self.fail("Problème de désérialisation pour le fichier " + filename)
+            self.assertIsNotNone(data.get("titre"))
+            self.assertIsNotNone(data.get("categorie"))
+            self.assertIsNotNone((data.get("questions")))
+            self.assertIsNotNone(data.get("difficulte"))
+            for question in data["questions"]:
+                self.assertIsNotNone(question["titre"])
+                self.assertIsNotNone(question["choix"])
+                for choix in question["choix"]:
+                    self.assertGreater(len(choix[0]), 0)
+                    self.assertTrue(isinstance(choix[1], bool))
+                good_answer = [choix[0] for choix in question["choix"] if choix[1]]
+                self.assertEqual(len(good_answer), 1)
